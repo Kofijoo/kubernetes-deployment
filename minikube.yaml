@@ -47,7 +47,7 @@ metadata:
 spec:
   rules:
     - host: "kofijoo.com"
-    - http:
+      http:
         paths:
           - pathType: Prefix
             path: /foo
@@ -63,4 +63,3 @@ spec:
                 name: bar-service
                 port:
                   number: 8080
----
