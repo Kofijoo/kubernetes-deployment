@@ -40,26 +40,60 @@ spec:
   ports:
     - port: 8080
 ---
+kind: Pod
+apiVersion: v1
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  containers:
+    - name: nginx
+      image: 'nginx'
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: nginx-service
+spec:
+  selector:
+    app: nginx
+  ports:
+    - port: 80
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: example-ingress
 spec:
   rules:
-    - host: "kofijoo.com"
+    - host: "foo.kofijoo.com"
       http:
         paths:
           - pathType: Prefix
-            path: /foo
+            path: /
             backend:
               service:
                 name: foo-service
                 port:
                   number: 8080
+    - host: "bar.kofijoo.com"
+      http:
+        paths:
           - pathType: Prefix
-            path: /bar
+            path: /
             backend:
               service:
                 name: bar-service
                 port:
                   number: 8080
+    - host: "nginx.kofijoo.com"
+      http:
+        paths:
+          - pathType: Prefix
+            path: /
+            backend:
+              service:
+                name: nginx-service
+                port:
+                  number: 80
