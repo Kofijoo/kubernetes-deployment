@@ -65,29 +65,10 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: example-ingress
+  namespace: prod  # Add namespace if needed
 spec:
   rules:
-    - host: "foo.kofijoo.com"
-      http:
-        paths:
-          - pathType: Prefix
-            path: /
-            backend:
-              service:
-                name: foo-service
-                port:
-                  number: 8080
-    - host: "bar.kofijoo.com"
-      http:
-        paths:
-          - pathType: Prefix
-            path: /
-            backend:
-              service:
-                name: bar-service
-                port:
-                  number: 8080
-    - host: "nginx.kofijoo.com"
+    - host: "*.kofijoo.com"
       http:
         paths:
           - pathType: Prefix
@@ -97,3 +78,5 @@ spec:
                 name: nginx-service
                 port:
                   number: 80
+
+
