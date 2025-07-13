@@ -1,0 +1,1874 @@
+Course: Kubernetes for DevOps Engineers. 
+Tutor: Samuel
+Date: June 24, 2025
+Lesson: Introduction to Kubernetes
+
+# Introduction to Kubernetes
+
+What is Kubernetes?
+Kubernetes, often abbreviated as K8s, is an open-source platform designed to automate the deployment, 
+scaling, and management of containerized applications. Originally developed by Google and now maintained 
+by the Cloud Native Computing Foundation (CNCF), Kubernetes has become the industry standard for container orchestration.
+
+# Evolution Of Application Deployments
+Monolith Vs Microservices
+
+Monolith is application built as one entity. Tightly coupled applications.
+# Advantages
+1. Simpler to manage.Testing becomes easier.
+2. Faster deployment times and great for small projects.
+
+# Disadvantages
+1. The application fails all at once when one service fails.
+2. Scalability becomes complex. 
+3. Any changes would require rebuilding  and redeployment of the entire application 
+
+# Microservices
+Microservices breaks down application into small independent services, responsible for specific business capability. These services could include backend payment services,login systems,password storage etc.
+
+# Advantage
+1. Scalable for large projects.
+2. Each service can be tested independently.
+
+# Disadvantages
+1. High Complexity bring difficulty in management of application.
+2. Cost Intensive.
+
+
+- The Problem Kubernetes Solves
+Before Kubernetes, deploying applications at scale was a complex and error-prone process. Organizations faced several challenges:
+1. Manual Deployment and Scaling: Without automation, deploying applications across multiple servers required significant manual effort. Scaling up or down to meet demand was slow and inefficient.
+2. Resource Utilization: Optimizing resource usage was difficult. Servers often ran under capacity, wasting computational resources and increasing costs.
+3. Application Resilience: Ensuring high availability and fault tolerance demanded complex configurations. Recovering from failures required manual intervention, leading to downtime.
+4. Environment Consistency: Discrepancies between development, testing, and production environments led to the classic "it works on my machine" problem, causing deployment issues.
+5. Complex Networking and Service Discovery: Configuring networking between services was intricate, and enabling services to discover each other dynamically was challenging.
+
+- Kubernetes addresses these problems by providing:
+1. Automated Deployment and Scaling: It automates the distribution of application containers across a cluster and adjusts the number of running containers based on demand.
+2. Efficient Resource Management: Kubernetes schedules workloads based on resource requirements and constraints, maximizing utilization.
+3. Self-Healing Mechanisms: It automatically restarts failed containers, replaces nodes, and kills unresponsive containers to maintain desired state.
+4. Consistent Environments: Containers encapsulate applications and their dependencies, ensuring consistency across different environments.
+5. Simplified Networking and Service Discovery: Kubernetes offers built-in service discovery and load balancing, simplifying communication between services.
+
+- How Kubernetes Makes Life Easier for Developers and Engineers
+
+For Developers:
+1. Focus on Application Development: Developers can concentrate on writing code without worrying about the underlying infrastructure or deployment complexities.
+2. Consistent Deployment Environment: Containers ensure that applications run the same way in development, staging, and production, reducing environment-related bugs.
+3. Simplified CI/CD Pipelines: Kubernetes integrates well with continuous integration and continuous deployment tools, streamlining the release process.
+4. Scalable Applications: Applications can handle increased load seamlessly, as Kubernetes manages scaling automatically.
+
+For Operations Engineers:
+1. Automated Operations: Routine tasks like deployment, scaling, and updates are automated, reducing manual workload and the potential for human error.
+2. Efficient Resource Utilization: Kubernetes optimizes the use of infrastructure resources, which can lead to cost savings.
+3. High Availability and Resilience: Built-in self-healing and replication features ensure that applications remain available, even in the face of failures.
+4. Flexibility and Portability: Kubernetes runs on various environments—on-premises, cloud, or hybrid setups—providing flexibility in infrastructure choices.
+5. Enhanced Security: Kubernetes offers features like secrets management and role-based access control (RBAC), helping to secure applications and infrastructure.
+
+# Kubernetes Architechture
+- Master Node(Control Plane) - ApiServer, Control Manager, CloudControl Manager, etcd,Scheduler
+- Worker Node - Container-runtime, kubelet, kube-proxy
+
+The Kube proxy manages the the network rules for  the communication between the pods and services.
+
+# How It All Works Together
+- You tell Kubernetes: "Run my app!"
+- The API server gets your request
+- The scheduler picks a worker node
+- The kubelet on that node starts your app inside a pod
+- The controller keeps checking — if the app crashes, Kubernetes restarts it
+- You access the app through a Service, like a phone number
+
+Credit : ChatGPT
+
+# Core Kubernetes Components
+- Pod - the smallest unit in k8s. An abstraction of a containerised application.
+        pods are ephemeral (they die out easily)
+- Service - an abstraction over ip addresses. static ip address.
+      Types of Service - NodePort, LoadBalancer, ClusterIp
+
+    NB: The lifecycle of of the service and pods are not connected. - If Pod crashes, the service and its IP address will be the same.
+
+# Kubernetes Commands
+- PODS - kubectl run <resourceName> --image=<imagename>
+        kubectl run podinfo --image=ghcr.io/stefanprodan/podinfo:6.2.2
+
+- Service - # kubectl expose pod podinfo --port=9898 --type=NodePort 
+- kubectl expose pod podinfo
+
+  This statement exposes the pod named podinfo 
+- --port=9898 
+  This is the port exposed by the container. 
+- --type=NodePort 
+  This is the type of service that is being used. 
+  We are using the NodePort service to expose the app to external traffic. 
+
+
+  - In kubernetes, traffic routing is done by labels and selectors on the pods and services.
+  Pods have labels and service has selectors. For traffic to be routed to the right pod labels on the pods must match the service selectors.
+  
+  # kubectl get {k8s-component} - get status of components
+  - kubectl get nodes - gets the node in the cluster
+  - kubectl get service - gets the services in the namespace
+  - kubectl get pod - gets the pods in the namespace
+  - kubectl get all - gets all resources in cluster
+  - kubectl get deployment - gets deployment in the namespace
+  - kubectl get namespace - gets all namespaces
+
+  # kubectl create {k8s-component} {name} {options} - create components
+   - kubectl create deployment nginx-deployment --image=nginx --replicas=5
+   - kubectl scale deployment/nginx-deploy --replicas=2
+
+  # kubectl edit {k8s-component} {name} - edit components
+  # kubectl delete {k8s-component} {name} - delete components
+
+  # Debugging
+  - kubectl logs {pod-name}
+  - kubectl describe {k8s resource}
+
+  - kubectl exec -it {pod-name} -- bash
+
+  - kubectl apply -f {config-file.yaml}
+
+  # Switching namespaces
+  - kubectl config set-context --current --namespace=jomacsit
+
+  - https://github.com/ahmetb/kubectx - this installs kubens
+
+
+# Difference between kubectl create and apply commands:
+
+1. kubectl create: This command is used to create a new resource. 
+You would typically use it with a YAML file that defines the resource, like so: 
+kubectl create -f pod.yaml. The create command is imperative, 
+which means it directly makes changes to the cluster state.
+
+A key limitation is that kubectl create doesn't provide a built-in solution for updating existing resources. 
+If you try to create a resource that already exists, you'll get an error.
+
+2. kubectl apply: 
+This command can be used to create or update resources. 
+Like kubectl create, you typically use it with a YAML file: 
+kubectl apply -f pod.yaml. However, apply is declarative, which means 
+you define in the file what you want the state of the resource to be, 
+and Kubernetes works out what needs to be done to achieve that state.
+
+One of the key features of kubectl apply is that it maintains a record of the previous 
+configuration when it updates a resource. This means that it can manage updates to resources 
+that it didn't originally create.
+
+
+# Kubernetes manifest files
+
+eg. 
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+spec:
+  selector:
+    app: nginx
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: NodePort
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod
+  labels:
+    app: nginx
+spec:
+  matchLabels:
+    app: nginx
+  containers:
+  - name: nginx
+    image: nginx
+    ports:
+    - containerPort: 80
+
+
+# Basic parts of k8s manifest file
+
+- apiVersion: specifies the api version
+- kind: specifies the kind of component to be created
+- metadata: a brief info about the component
+- spec: the specification of the component to be created
+
+
+
+
+
+- Deployment(Replicasets)
+
+eg.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-deployment
+  namespace: prod
+  labels:
+    app: mongodb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+      - name: mongodb
+        image: mongo
+        ports:
+        - containerPort: 27017
+        env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret
+              key: mongo-root-username
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret
+              key: mongo-root-password
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-service
+  namespace: prod
+spec:
+  selector:
+    app: mongodb
+  ports:
+    - protocol: TCP
+      port: 27017
+      targetPort: 27017
+
+
+eg.2
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-express
+  namespace: prod
+  labels:
+    app: mongo-express
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo-express
+  template:
+    metadata:
+      labels:
+        app: mongo-express
+    spec:
+      containers:
+      - name: mongo-express
+        image: mongo-express
+        ports:
+        - containerPort: 8081
+        env:
+        - name: ME_CONFIG_MONGODB_ADMINUSERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret
+              key: mongo-root-username
+        - name: ME_CONFIG_MONGODB_ADMINPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret
+              key: mongo-root-password
+        - name: ME_CONFIG_MONGODB_SERVER
+          valueFrom:
+            configMapKeyRef:
+              name: mongodb-configmap
+              key: database_url
+        
+        - name: ME_CONFIG_BASICAUTH
+          value: "false"
+        - name: ME_CONFIG_MONGODB_URL
+          value: "mongodb://$(ME_CONFIG_MONGODB_ADMINUSERNAME):(ME_CONFIG_MONGODB_ADMINPASSWORD)@$(DATABASE_URL)"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-express-service
+  namespace: prod
+spec:
+  selector:
+    app: mongo-express
+  ports:
+    - protocol: TCP
+      port: 8081
+      targetPort: 8081
+      nodePort: 32081
+  type: LoadBalancer
+
+
+- ConfigMap
+eg.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongodb-configmap
+  namespace: prod
+data:
+  database_url: mongodb-service
+
+- Secret
+eg.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mongo-secret
+  namespace: prod
+type: Opaque
+data:
+  mongo-root-username: cm9vdA==  # base64 encoded value for 'root'
+  mongo-root-password: cGFzc3dvcmQ=  # base64 encoded value for 'password'
+
+# Ingress
+
+- Enable the Ingress controller in your cluster if it's not already enabled. -- "minikube addons enable ingress"
+
+- Edit /etc/hosts file to map the hostnames to the localhost IP address. "sudo vi /etc/hosts" 
+  Add the following line:
+  For Mac/Linux users -- "127.0.0.1 bar.com"  'echo "127.0.0.1 bar.com" >> /etc/hosts' 
+  For windows users -- 'echo "127.0.0.1 bar.com" >> C:\Windows\System32\drivers\etc\hosts'
+- Run "kubectl apply -f ingress.yaml" to create the Ingress resource.
+- Run "minikube tunnel" to expose the Ingress controller and allow external access to the services.
+- Access the application in your browser by navigating to http://bar.com 
+
+
+eg.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-wildcard-host
+spec:
+  rules:
+  - host: "bar.com"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: mongo-express-service
+            port:
+              number: 8081
+
+eg.2
+kind: Pod
+apiVersion: v1
+metadata:
+  name: foo-app
+  labels:
+    app: foo
+spec:
+  containers:
+    - name: foo-app
+      image: 'kicbase/echo-server:1.0'
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: foo-service
+spec:
+  selector:
+    app: foo
+  ports:
+    - port: 8080
+---
+kind: Pod
+apiVersion: v1
+metadata:
+  name: bar-app
+  labels:
+    app: bar
+spec:
+  containers:
+    - name: bar-app
+      image: 'kicbase/echo-server:1.0'
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: bar-service
+spec:
+  selector:
+    app: bar
+  ports:
+    - port: 8080
+---
+kind: Pod
+apiVersion: v1
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  containers:
+    - name: nginx
+      image: 'nginx'
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: nginx-service
+spec:
+  selector:
+    app: nginx
+  ports:
+    - port: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: example-ingress
+spec:
+  rules:
+  - host: bar.com
+    http:
+        paths:
+          - pathType: Prefix
+            path: /foo
+            backend:
+              service:
+                name: foo-service
+                port:
+                  number: 8080
+          - pathType: Prefix
+            path: /bar
+            backend:
+              service:
+                name: bar-service
+                port:
+                  number: 8080
+  - host: nginx.bar.com
+    http:
+        paths:
+          - pathType: Prefix
+            path: /
+            backend:
+              service:
+                name: nginx-service
+                port:
+                  number: 80
+---
+
+
+
+- Volumes (Persistent Volumes and Persistent Volume Claims, Storage Classes)
+Persistent Volumes (PV) and Persistent Volume Claims (PVC) are used in Kubernetes to manage storage resources. 
+They provide a way to abstract storage from the underlying infrastructure,
+ allowing developers to use storage without worrying about the specifics of how it is provisioned or managed.
+
+
+eg.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: example-pv
+spec:
+  capacity:
+    storage: 100Gi
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: local-storage
+  local:
+    path: /mnt/disks/ssd1
+  
+eg.2
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: example-pv
+spec:
+  capacity:
+    storage: 10Gi
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: local-storage
+  local:
+    path: /mnt/disks/ssd1
+
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: example-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: local-storage
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: example-pod
+spec:
+  containers:
+  - name: example-container
+    image: nginx
+    volumeMounts:
+    - mountPath: /usr/share/nginx/html
+      name: example-volume
+      
+  volumes:
+  - name: example-volume
+    persistentVolumeClaim:
+      claimName: example-pvc
+
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: local-storage
+provisioner: k8s.io/minikube-hostpath
+reclaimPolicy: Delete
+volumeBindingMode: WaitForFirstConsumer
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mypvc
+spec:
+  storageClassName: local-storage
+  resources:
+    requests:
+      storage: <Size>
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+
+Volumes: In Kubernetes, volumes are storage units that are mounted into pods. 
+Unlike container storage, volumes persist even if the container within the pod is restarted.
+Persistent Volumes (PV): These are storage resources in the cluster that are provisioned 
+by administrators. They provide storage that persists beyond the lifecycle of individual pods.
+Persistent Volume Claims (PVC): These are requests for storage by a user. Pods use PVCs to gain
+access to PVs.
+
+Key Concepts
+Kubernetes Volume: A volume can be attached to a pod to provide shared or persistent storage.
+Persistent Volume (PV): This represents a piece of storage in the cluster that has been 
+provisioned by an administrator or dynamically by storage classes.
+Persistent Volume Claim (PVC): This is a request for storage by a user, typically by a pod. 
+PVCs are used to claim a PV.
+
+
+1. Using a Simple Volume in a Pod
+In this example, we use a simple emptyDir volume that persists as long as the pod is running 
+but will be lost when the pod is deleted.
+
+volume-pod.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: volume-demo-pod
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    volumeMounts:
+    - name: my-volume
+      mountPath: /usr/share/nginx/html
+  volumes:
+  - name: my-volume
+    emptyDir: {}
+
+
+volumeMounts: Mounts the my-volume to /usr/share/nginx/html in the container.
+emptyDir: This is a type of volume that is created when a pod is assigned to a node 
+and persists as long as the pod is running. If the pod is deleted, the data is lost.
+
+This example demonstrates that volumes allow data sharing between containers within a pod.
+
+
+Using Persistent Volume (PV) and Persistent Volume Claim (PVC)
+In this example, we'll create a PV and PVC to store data that persists beyond the pod lifecycle.
+
+Step 1: Create a Persistent Volume (PV)
+
+persistent-volume.yaml
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: my-pv
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /mnt/data
+
+
+- capacity: The amount of storage the volume has (1Gi).
+- accessModes: This PV can be mounted as ReadWriteOnce, meaning it can be accessed 
+by a single node.
+- persistentVolumeReclaimPolicy: Specifies what happens to the PV when released by the PVC. 
+The value Retain means the PV will not be deleted.
+- hostPath: Uses a local directory on the node (/mnt/data) as storage.
+
+
+Step 2: Create a Persistent Volume Claim (PVC)
+
+persistent-volume-claim.yaml
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+
+accessModes: Requests ReadWriteOnce, matching the access mode of the PV.
+resources.requests.storage: Requests 1Gi of storage.
+
+The PVC will dynamically bind to the PV that meets its requirements (e.g., size, access modes).
+
+
+Step 3: Use the PVC in a Pod
+
+Now, create a pod that uses the PVC as its storage.
+
+pod-pvc.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pvc-demo-pod
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    volumeMounts:
+    - name: storage
+      mountPath: /usr/share/nginx/html
+  volumes:
+  - name: storage
+    persistentVolumeClaim:
+      claimName: my-pvc
+
+
+volumeMounts: Mounts the volume at /usr/share/nginx/html.
+volumes: Uses the my-pvc Persistent Volume Claim to bind the storage.
+
+
+- Access Modes:
+ReadWriteOnce (RWO): The volume can be mounted as read-write by a single node.
+ReadOnlyMany (ROX): The volume can be mounted as read-only by many nodes.
+ReadWriteMany (RWX): The volume can be mounted as read-write by many nodes.
+
+- Reclaim Policies:
+Retain: Keeps the PV even after it is released by the PVC.
+Recycle: Clears the volume and makes it available for reuse (deprecated in many environments).
+Delete: Deletes the PV when the PVC is deleted (commonly used with dynamically provisioned storage).
+
+
+- Statefulset
+StatefulSets are a Kubernetes resource used to manage stateful applications. They provide guarantees about the ordering and uniqueness of pods, making them suitable for applications that require stable network identities and persistent storage.
+
+- Daemonsets
+
+
+Kubernetes Architechture - control plane and worker nodes
+- Control plane - api server, controller manager, scheduler, etcd
+- Worker nodes - kubelet, kube-proxy, container runtime
+
+Microservices Vs Monolith
+- Monolith - tightly coupled, single entity application
+- Microservices - loosely coupled, independent services
+
+# Kubernetes Resources
+- Pod - the smallest unit in Kubernetes, an abstraction of a containerized application
+- Service - an abstraction over IP addresses, providing a stable endpoint for accessing pods
+- Deployment - manages a set of replicas of a pod, ensuring the desired state is maintained
+- ConfigMap - used to store non-sensitive configuration data in key-value pairs
+- Secret - used to store sensitive information, such as passwords or API keys, in an encoded format
+- Ingress - manages external access to services, providing HTTP routing and load balancing
+- Persistent Volume (PV) - a piece of storage in the cluster that has been provisioned by an administrator
+- Persistent Volume Claim (PVC) - a request for storage by a user, which can be fulfilled by a PV
+- StatefulSet - manages stateful applications, providing stable network identities and persistent
+storage
+- DaemonSet - ensures that a copy of a pod runs on all or some nodes in the cluster, useful for background tasks like logging or monitoring
+
+
+- Creating a Kubernetes Cluster on AWS (EKS)
+To create a Kubernetes cluster on AWS using EKS, you can use the AWS Management Console or the AWS CLI. Here are the steps to create a cluster using the AWS CLI:
+1. Install the AWS CLI and configure it with your AWS credentials.
+- Create a VPC (Virtual Private Cloud) to host your EKS cluster.
+- Create an IAM role for the control plane the EKS cluster with the necessary permissions managed by AWS.
+- Create an EKS cluster
+- Create a node group which will house the nodes(EC2).
+- Create an IAM role for the worker nodes with the necessary permissions.
+- Launch the worker nodes in the VPC and associate them with the EKS cluster.
+- Update your kubeconfig file to connect to the EKS cluster using the command:
+```bash
+  aws eks --region <region> update-kubeconfig --name <cluster-name>
+```
+- Verify the cluster is running by using the command:
+```bash
+  kubectl get nodes
+```
+- Deploy applications to the cluster using Kubernetes manifests.
+
+# Statefulset
+ - They are used to manage stateful applications, providing stable network identities and persistent storage, like database.
+- Manages the deployment and scaling of a set of pods, ensuring that each pod has a unique identity,ordered deployment and stable storage.
+
+# Stateful Applications Vs Stateless Applications
+- Stateful applications maintain state across sessions, while stateless applications do not. 
+- Stateful applications require persistent storage, while stateless applications do not.
+- Stateful applications are typically more complex to manage due to their need for data consistency and recovery mechanisms, while stateless applications are simpler and easier to scale.
+
+# StatefulSet Example
+eg.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mystatefulset
+spec:
+  selector:
+    matchLabels:
+      app: myapp
+  serviceName: <ServiceName>
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+      - name: myapp
+        image: registry.k8s.io/nginx-slim:0.8
+        ports:
+        - containerPort: 80
+          name: web
+        volumeMounts:
+        - name: www
+          mountPath: /usr/share/nginx/html
+  volumeClaimTemplates:
+  - metadata:
+      name: www
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+
+# DaemonSet
+DaemonSets ensure that a copy of a pod runs on all or some nodes in the cluster.
+They are useful for running background tasks like logging or monitoring on every node.
+
+- To test Daemonsets on minikube, run the daemonset manifest file then Run
+"minikube node add" to add a new node to the cluster.
+
+- When done get nodes in the cluster by running "kubectl get nodes" to see the new node added.
+- To delete the nodes, you can use the command "minikube node delete <node name>".
+- If you want to delete all the nodes, you can run "minikube node delete --all".
+eg.
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: my-daemonset
+spec:
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+      - name: myapp
+        image: fluent/fluentd
+        ports:
+        - containerPort: 80
+          name: web
+
+eg.2
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fluentd-agent
+  namespace: default
+  labels:
+    k8s-app: fluentd-agent
+spec:
+  selector:
+    matchLabels:
+      k8s-app: fluentd-agent
+  template:
+    metadata:
+      labels:
+        k8s-app: fluentd-agent
+    spec:
+      containers:
+      - name: fluentd
+        image: quay.io/fluentd_elasticsearch/fluentd:v4.5.2
+
+
+Setting Up EKS with AWS CLI
+
+# How to Setup an EKS Cluster using AWS CLI
+
+1.  # Install and Configure the AWS CLI
+Ensure that you have the AWS CLI installed and configured with the necessary access credentials and default region. If not already done, you can configure it by running:
+- aws configure
+
+2. # Create an IAM Role for EKS
+Create an IAM role that EKS can assume to create AWS resources for Kubernetes. You need this role to allow EKS service to manage resources on your behalf.
+
+Create a file called trust.json in your working directory on your local machine with the following policy:
+
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "eks.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+
+# Run the following command to create the role:
+
+aws iam create-role --role-name eksServiceRole --assume-role-policy-document file://trust.json
+
+# Attach the EKS service policy to the role:
+aws iam attach-role-policy --role-name eksServiceRole --policy-arn arn:aws:iam::aws:policy/AmazonEKSServicePolicy
+
+aws iam attach-role-policy --role-name eksServiceRole --policy-arn arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
+
+3. # Create the EKS Cluster
+You can create the cluster using the following command. Replace <ClusterName>, <RoleARN>, and other placeholders with your specific values.
+
+aws eks create-cluster --name <ClusterName> --role-arn <RoleARN> --resources-vpc-config subnetIds=<Subnet1,Subnet2>,securityGroupIds=<SecurityGroupId>
+
+- <RoleARN> is the ARN of the role you created above. 
+- <Subnet1,Subnet2> copy the ID of the subnets you want to deploy into. Always use a private subnet when available to make your cluster publicly inaccessible. 
+- <SecurityGroupId> use an existing securitygroup ID with the necessary permissions. 
+
+4. # Create a Node Group
+Before creating a node group, you need an IAM role for the EKS worker nodes. Create a similar trust policy for the worker nodes and attach the necessary IAM policies (AmazonEKSWorkerNodePolicy, AmazonEKS_CNI_Policy, AmazonEC2ContainerRegistryReadOnly).
+
+4a. # Create the Trust Relationship Policy Document
+
+Save the following policy to a file named eks-nodegroup-trust-policy.json. This policy allows EC2 and EKS services to assume the role.
+
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": [
+          "ec2.amazonaws.com",
+          "eks.amazonaws.com"
+        ]
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+
+4b. # Create the Role
+Use the AWS CLI to create a new role with this trust relationship.
+
+aws iam create-role --role-name MyCustomEKSNodeGroupRole --assume-role-policy-document file://eks-nodegroup-trust-policy.json
+
+
+4c. # Attach Policies:
+Attach the necessary policies to the role. These typically include AmazonEKSWorkerNodePolicy, AmazonEKS_CNI_Policy, AmazonEC2ContainerRegistryReadOnly, and any other policies specific to your deployment.
+
+aws iam attach-role-policy --role-name MyCustomEKSNodeGroupRole --policy-arn arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+
+aws iam attach-role-policy --role-name MyCustomEKSNodeGroupRole --policy-arn arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+
+aws iam attach-role-policy --role-name MyCustomEKSNodeGroupRole --policy-arn arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+
+
+4d. # Use the Custom Role in Your EKS Node Group Creation
+Now, use the ARN of this newly created custom role when creating your node group:
+
+aws eks create-nodegroup --cluster-name <ClusterName> --nodegroup-name <NodeGroupName> --node-role arn:aws:iam::<YourAWSAccountNumber>:role/MyCustomEKSNodeGroupRole --subnets subnet-0b79cd63eecbc37ac subnet-0dda94c84b32365c3 subnet-0eeece074b0deb2b7 subnet-09a7a0d4db4d6a305 --instance-types t2.medium --scaling-config minSize=3,maxSize=5,desiredSize=3
+
+
+5. # Update 'kubeconfig'
+To manage your cluster with kubectl, update your kubeconfig file:
+
+aws eks update-kubeconfig --name <ClusterName>
+
+
+# Application Health Checks 
+- Readiness Probe: A readiness probe is designed to probe the containers inside a pod 
+and decide if they can receive traffic. 
+- Liveness Probe: The liveness probe is designed to monitor your container and restart 
+it when unhealthy. 
+
+Readiness Probe Example
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+    - name: nginx
+      image: nginx
+      ports:
+        - containerPort: 80
+      readinessProbe:
+        tcpSocket:
+          port: 80
+        initialDelaySeconds: 2
+        periodSeconds: 5
+      livenessProbe:
+        tcpSocket:
+          port: 80
+        initialDelaySeconds: 15
+        periodSeconds: 10
+
+
+
+# Overview of Application Health Checks
+
+- Adding a Liveness probe
+A liveness probe is designed to probe the container and check if the process is healthy.
+
+If it isn't, it restarts the container.
+
+You could use a liveness probe to automatically restart the container when the web server goes into a deadlock.
+
+Let's amend the Deployment definition to include it:
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mario-deployment
+spec:
+  selector:
+    matchLabels:
+      name: mario
+  template:
+    metadata:
+      labels:
+        name: mario
+    spec:
+      containers:
+        - name: mario
+          image: sevenajay/mario
+          ports:
+            - containerPort: 80
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 6
+            timeoutSeconds: 1
+            periodSeconds: 5
+            successThreshold: 1
+            failureThreshold: 1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mario-service
+spec:
+  type: NodePort
+  selector:
+    name: mario
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mario-ingress
+  namespace: super-mario
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mario-service
+                port:
+                  number: 80
+
+
+
+# Let's break down the details:
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 6
+            timeoutSeconds: 1
+            periodSeconds: 5
+            successThreshold: 1
+            failureThreshold: 1
+
+- httpGet is the command that should be executed to inspect the endpoint. In this case is an HTTP probe, but you could have a TCP probe or execute a generic command in the container.
+- initialDelaySeconds is the initial delay. The probe will start checking the container only after 6 seconds.
+- timeoutSeconds specifies how long to wait before timing out the request.
+- periodSeconds is the frequency used to check the probe. In this case, the /health endpoint is checked every 5 seconds.
+- successThreshold is the number of successful attempts before you can consider the probe successful.
+- failureThreshold is the number of failing attempts before the probe gives up.
+
+
+
+# Adding a readiness probe
+The readiness probe decides if the container is ready to receive traffic or not.
+When it is ready, the probe attaches the container to the service.
+So you could include a readiness probe in your Deployment like this:
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mario-deployment
+spec:
+  selector:
+    matchLabels:
+      name: mario
+  template:
+    metadata:
+      labels:
+        name: mario
+    spec:
+      containers:
+        - name: mario
+          image: sevenajay/mario
+          ports:
+            - containerPort: 80
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 80
+            initialDelaySeconds: 6
+            timeoutSeconds: 1
+            periodSeconds: 5
+            successThreshold: 1
+            failureThreshold: 10
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 80
+            initialDelaySeconds: 15
+            timeoutSeconds: 1
+            periodSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+
+As you might have noticed, most of the configuration for the readiness probe mimics the same properties of the liveness probe.
+
+There's a notable change, though.
+
+The httpGet probe checks the /ready and not the /health endpoint.
+
+It makes sense:
+
+/health is the endpoint for the process. The process could be healthy, but not ready to accept connections.
+/ready is the endpoint for the traffic. You might want to wait a bit longer after the process is healthy before you route traffic to it.
+
+Is the Readiness always executed after the Liveness probe?
+
+Kubernetes doesn't care.
+
+You can do a readiness check before the liveness or vice versa.
+
+As far as Kubernetes is concerned, the two probes are independent.
+
+However, as an engineer you might want to wait for the Liveness probe before you start checking the Readiness.
+
+Let's submit the amended Deployment to the cluster:
+kubectl apply -f deployment.yaml
+
+
+
+This time you should observe:
+- The app can't be reached or
+- You fixed the "NOT READY" messages, but what about the app not being available?
+
+You are operating a single Pod.
+
+If the Pod restarts and the readiness probe takes at least 15 seconds to attach the container to the Service, you have at least 15 seconds in which there is no Pod serving traffic.
+
+Fortunately, you can easily fix this by increasing the number of replicas in your deployment.
+
+Increase the replicas to 5.
+
+Liveness and readiness probes will check the status of your containers at regular intervals.
+
+You can customise how frequently each probe should run and if it should wait for a delay before checking it the first time.
+
+You can also tailor how many successful responses you should receive before considering the container healthy or unhealthy.
+
+- Probes start monitoring your containers when your Pod starts.
+
+You can also customise:
+- the number of seconds after which the probe times out with timeoutSeconds
+- the minimum consecutive successes for the probe to be considered successful after having failed with successThreshold
+- the number of successive retries before considering a probe as failed failureThreshold
+
+# Readiness probes are great to stop receiving traffic, which is generally useful when:
+- There's an error in the app and you want to stop receiving traffic.
+- You are still initialising the app and you are not ready to receive traffic yet.
+
+# The liveness is probe is useful to exit from unrecoverable states.
+Liveness probes are useful for scenarios where there's nothing left but restarting the app such as:
+- A deadlock.
+- An infinite loop.
+
+- What happens after the container in the Pod is restarted?
+The container comes back up and looks healthy. The liveness and readiness probe are healthy too.
+
+
+# Role-Based Access Control (RBAC)
+Role-Based Access Control (RBAC) is a method of regulating access to computer or network resources
+based on the roles of individual users within an organization. In Kubernetes, RBAC is used to
+control who can access the Kubernetes API and what actions they can perform.
+
+Authentication: This is the process of verifying the identity of a user or service account.
+Authorization: This is the process of determining whether a user or service account has permission to perform a specific action on a resource.
+
+# Kubernetes RBAC Components
+- Role: A role defines a set of permissions within a specific namespace. It can be used to grant access to resources like pods, services, and deployments within that namespace.
+- ClusterRole: A cluster role defines a set of permissions that can be applied across the entire cluster, not limited to a specific namespace. It can be used to grant access to cluster-wide resources.
+- RoleBinding: A role binding associates a role with a user or service account within a specific namespace. It grants the permissions defined in the role to the user or service account.
+- ClusterRoleBinding: A cluster role binding associates a cluster role with a user or service account across the entire cluster. It grants the permissions defined in the cluster role to the user or service account.
+
+# Example of RBAC in Kubernetes
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pod-reader
+  namespace: default
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: read-pods
+  namespace: default
+subjects:
+- kind: User
+  name: alice # The user to whom the role is bound
+roleRef:
+  kind: Role
+  name: pod-reader # The role being bound
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cluster-admin
+rules:
+- apiGroups: [""]
+  resources: ["*"]
+  verbs: ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: admin-binding
+subjects:
+- kind: User
+  name: bob # The user to whom the cluster role is bound
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin # The cluster role being bound
+  apiGroup: rbac.authorization.k8s.io
+# Explanation of the Example
+- The first part defines a Role named pod-reader in the default namespace, which allows reading pods
+- The second part defines a RoleBinding named read-pods that binds the pod-reader role to a user named alice in the default namespace.
+- The third part defines a ClusterRole named cluster-admin, which grants full access to all resources in the cluster.
+- The fourth part defines a ClusterRoleBinding named admin-binding that binds the cluster-admin role to a user named bob across the entire cluster.
+# How to Apply RBAC in Kubernetes
+1. Create a YAML file with the RBAC definitions (like the example above).
+2. Use the kubectl apply command to apply the RBAC definitions to your cluster:
+```bash
+kubectl apply -f rbac.yaml
+```
+3. Verify the RBAC configuration by checking the roles and bindings:
+```bash
+kubectl get roles -n default
+kubectl get rolebindings -n default
+kubectl get clusterroles
+kubectl get clusterrolebindings
+```
+# Best Practices for RBAC in Kubernetes
+- Use the principle of least privilege: Grant only the permissions necessary for a user or service account
+- Regularly review and audit RBAC policies to ensure they are still relevant and secure.
+- Use namespaces to isolate resources and apply RBAC policies at the namespace level.
+- Use ClusterRoles and ClusterRoleBindings for cluster-wide permissions, but be cautious with granting broad permissions.
+- Use labels and annotations to organize and manage RBAC resources effectively.
+- Document your RBAC policies and their intended use cases to help maintain clarity and understanding within your team.
+
+# Service Accounts
+Service accounts are special types of accounts in Kubernetes that are used to provide an identity for processes running in pods. They are used to authenticate and authorize access to the Kubernetes API and other resources within the cluster.
+# Key Concepts of Service Accounts
+- Service Account: A service account is an account for processes running in pods. It provides an identity for those processes and is used to authenticate them to the Kubernetes API.
+- Token: Each service account is associated with a token that is used to authenticate the service account to the Kubernetes API. This token is automatically mounted into pods that use the service account.
+- Namespace: Service accounts are namespaced resources, meaning they exist within a specific namespace. Each namespace can have its own set of service accounts.
+# Example of Creating a Service Account
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: my-service-account
+  namespace: default
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+  namespace: default
+spec:
+  serviceAccountName: my-service-account
+  containers:
+  - name: my-container
+    image: nginx
+# Explanation of the Example
+- The first part defines a ServiceAccount named my-service-account in the default namespace.
+- The second part defines a Pod named my-pod in the default namespace that uses the my-service-account service account.
+- The serviceAccountName field in the Pod spec specifies which service account to use for the pod. This service account will be used to authenticate the pod's processes to the Kubernetes API.
+# How to Create and Use Service Accounts in Kubernetes
+1. Create a YAML file with the service account definition (like the example above).
+2. Use the kubectl apply command to create the service account in your cluster:
+```bash
+kubectl apply -f service-account.yaml
+```
+3. Create a pod that uses the service account by specifying the serviceAccountName field in the pod spec.
+4. Verify the service account is created and used by checking the pods and service accounts:
+```bash
+kubectl get serviceaccounts -n default
+kubectl get pods -n default
+``` 
+
+
+#Updating a deployed application
+
+- To update a deployed application in kubernetes, you can set the image of the deployment to the new version using the command:
+```bash
+kubectl set image deployment/<deployment-name> <container-name>=<new-image>
+```
+- For example, to update the image of a deployment named "my-deployment" with a container named "my-container" to a new image "my-image:v2", you would run:
+```bash
+kubectl set image deployment/my-deployment my-container=my-image:v2
+```
+- This command will update the deployment and trigger a rolling update, where Kubernetes will gradually replace the old pods with new ones running the updated image.
+For help with the command, you can run:
+```bash
+kubectl set image --help
+```
+Checking the status of the deployment after updating can be done using:
+```bash
+kubectl rollout status deployment/<deployment-name>
+```
+# To roll back to a previous version of the deployment, you can use the command:```bash
+kubectl rollout undo deployment/<deployment-name>
+```
+- For example, to roll back the deployment named "my-deployment", you would run:
+```bash
+kubectl rollout undo deployment/my-deployment
+```
+- This command will revert the deployment to the previous version, restoring the old image and configuration.
+
+- kubectl rollout --help
+Manage the rollout of one or many resources.
+        
+ Valid resource types include:
+
+  *  deployments
+  *  daemonsets
+  *  statefulsets
+
+Examples:
+  # Rollback to the previous deployment
+  kubectl rollout undo deployment/abc
+  
+  # Check the rollout status of a daemonset
+  kubectl rollout status daemonset/foo
+  
+  # Restart a deployment
+  kubectl rollout restart deployment/abc
+  
+  # Restart deployments with the 'app=nginx' label
+  kubectl rollout restart deployment --selector=app=nginx
+
+Available Commands:
+  history       View rollout history
+  pause         Mark the provided resource as paused
+  restart       Restart a resource
+  resume        Resume a paused resource
+  status        Show the status of the rollout
+  undo          Undo a previous rollout
+
+Usage:
+  kubectl rollout SUBCOMMAND [options]
+
+Use "kubectl rollout <command> --help" for more information about a given command.
+Use "kubectl options" for a list of global command-line options (applies to all commands).
+
+
+# Autoscaling in Kubernetes
+- Horizontal Pod Autoscaler (HPA): Automatically scales the number of pods in a deployment or
+replica set based on observed CPU utilization or other select metrics.
+- Vertical Pod Autoscaler (VPA): Automatically adjusts the CPU and memory requests and limits for
+pods based on historical usage.
+- Cluster Autoscaler: Automatically adjusts the size of the Kubernetes cluster by adding or removing nodes based
+on the resource requirements of the pods running in the cluster.
+
+For Autoscaling, we need to have metrics-server installed in the cluster.
+You can install it using the following command:
+```bash
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/high-availability-1.21+.yaml
+```
+
+In the "minikube" environment, you can enable the metrics server by running:
+```bash
+minikube addons enable metrics-server
+```
+
+# Horizontal Pod Autoscaler (HPA) Commands
+- To create an HPA, you can use the command:
+```bash
+kubectl autoscale deployment <deployment-name> --cpu-percent=<target-cpu-utilization> --min=<min-replicas> --max=<max-replicas>
+```
+- For example, to create an HPA for a deployment named "my-deployment" with a target CPU utilization of 50%, a minimum of 2 replicas, and a maximum of 10 replicas, you would run:
+```bash
+kubectl autoscale deployment my-deployment --cpu-percent=50 --min=2 --max=10
+``` 
+- To view the status of the HPA, you can use the command:
+```bash
+kubectl get hpa
+```
+- To delete an HPA, you can use the command:
+```bash
+kubectl delete hpa <hpa-name>
+```
+- For example, to delete an HPA named "my-hpa", you would run:
+```bash
+kubectl delete hpa my-hpa
+```
+
+# Example of Horizontal Pod Autoscaler (HPA)
+To demonstrate the Horizontal Pod Autoscaler (HPA), we can use a simple PHP Apache application
+that serves a static page. The HPA will automatically scale the number of pods based on CPU
+utilization.
+# Create a Deployment and Service for the PHP Apache application
+- kubectl apply -f https://k8s.io/examples/application/php-apache.yaml
+# This command will create a deployment named "php-apache" and a service to expose it.
+# To create the Horizontal Pod Autoscaler for the PHP Apache application, you can use the following command:
+```bash
+kubectl autoscale deployment php-apache --cpu-percent=50 --min=2 --max=10
+```
+# This command will create an HPA that targets the "php-apache" deployment, with a target CPU
+utilization of 50%, a minimum of 2 replicas, and a maximum of 10 replicas.
+# To view the status of the HPA, you can use the command:
+```bash
+kubectl get hpa
+```
+# This command will show you the current status of the HPA, including the current number of
+replicas, the target CPU utilization, and the current CPU utilization of the pods.
+
+# To test the HPA, you can generate load on the PHP Apache application using a tool like
+# Apache Benchmark (ab) or Siege. For example, you can use the following command to
+# generate load on the application:
+```bash
+# Run this in a separate terminal
+# so that the load generation continues and you can carry on with the rest of the steps
+kubectl run -i --tty load-generator --rm --image=busybox:1.28 --restart=Never -- /bin/sh -c "while sleep 0.01; do wget -q -O- http://php-apache; done"
+```
+# This command will create a pod named "load-generator" that continuously sends requests to the
+# PHP Apache application, generating load on the deployment.
+# You should see the number of replicas in the HPA increasing as the CPU utilization of the
+# PHP Apache application exceeds the target CPU utilization of 50%. You can monitor the HPA
+# status using the command:
+```bash
+kubectl get hpa
+```
+
+Or watch with:
+```bash
+# type Ctrl+C to end the watch when you're ready
+kubectl get hpa php-apache --watch
+```
+
+# You should see the current number of replicas increasing as the load on the application increases.
+# Once you are done testing, you can stop the load generation by pressing Ctrl+C in the
+# terminal where you ran the load generator command.
+# You can also delete the load generator pod using the command:
+```bash
+kubectl delete pod load-generator
+```
+# Finally, you can delete the PHP Apache deployment and service using the command:
+```bash
+kubectl delete deployment php-apache
+kubectl delete service php-apache
+```
+# This will clean up the resources created for the HPA demonstration.
+
+# Example YAML for Horizontal Pod Autoscaler (HPA)
+
+HPA Example
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-apache
+spec:
+  selector:
+    matchLabels:
+      run: php-apache
+  template:
+    metadata:
+      labels:
+        run: php-apache
+    spec:
+      containers:
+      - name: php-apache
+        image: registry.k8s.io/hpa-example
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            cpu: 500m
+          requests:
+            cpu: 200m
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-apache
+  labels:
+    run: php-apache
+spec:
+  ports:
+  - port: 80
+  selector:
+    run: php-apache
+
+# Update Strategies In Kubernetes
+- Rolling Update: The default update strategy in Kubernetes. It gradually replaces old pods with new ones
+while ensuring that a minimum number of pods are available at all times.
+ Rolling Update incrementally replaces old pods with new ones in a controlled manner, ensuring that the application remains available during the update process.
+ It works by :
+  1. Scaling down old replicaset  while scaling up new one.
+  2. Maintaining minimum number of pods available during the update process.
+  3. Continues until all pods are replaced with the new version.
+  - It allows for zero-downtime deployments by ensuring that a minimum number of pods are available during the update process.
+  - It can be configured with parameters like maxUnavailable and maxSurge to control the update process.
+  - maxUnavailable: The maximum number of pods that can be unavailable during the update process.
+  - maxSurge: The maximum number of pods that can be created above the desired number of pods during the update process.
+  - Example:
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: my-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-container
+        image: my-image:v1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+```
+
+
+- Recreate: This strategy terminates all existing pods before creating new ones. It is useful
+for applications that cannot handle multiple versions running simultaneously.
+- Recreate strategy is used when the application cannot handle multiple versions running simultaneously.
+  - It works by terminating all existing pods before creating new ones.
+  - It ensures that there is no overlap between old and new pods, which can be useful for applications that require a clean state.
+  
+  Example:
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers: 
+      - name: my-container
+        image: my-image:v1
+  strategy:
+    type: Recreate
+```
+
+
+- Blue-Green Deployment: A deployment strategy that involves maintaining two separate environments (blue and green)
+where one is live and the other is idle. When a new version is ready, traffic is switched to the new environment
+while the old one remains intact. This allows for quick rollbacks if needed.
+- Blue-Green Deployment is a deployment strategy that involves maintaining two separate environments (blue and green).
+  - One environment is live (blue) while the other is idle (green).
+  - When a new version is ready, traffic is switched to the new environment (green) while the old one (blue) remains intact.
+  - This allows for quick rollbacks if needed, as the old version is still available in the blue environment.
+  
+  Example:```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-container
+        image: my-image:v1
+  strategy:
+    type: BlueGreen
+    blueGreen:
+      activeService: my-app-blue
+      previewService: my-app-green
+      scaleDownDelaySeconds: 60
+```
+- Rolling Update with Blue-Green Deployment: This strategy combines the rolling update approach with blue-green deployment.
+  - It allows for gradual updates while maintaining the ability to switch traffic between two environments.
+  - It can be useful for applications that require both zero-downtime updates and quick rollbacks.
+
+  Best For:
+  - Critical customer-facing applications that require zero downtime and quick rollbacks.
+  - Major version updates where you want to test the new version in production before fully switching over.
+  - When you need to test the new version with production data without affecting the live environment.
+
+
+- Canary Deployment: A deployment strategy that gradually rolls out a new version to a small subset
+of users before rolling it out to the entire user base. This allows for testing the new version
+in production with minimal risk.
+- Canary Deployment is a deployment strategy that gradually rolls out a new version to a small subset of users before rolling it out to the entire user base.
+  - It allows for testing the new version in production with minimal risk.
+  - It works by deploying the new version alongside the old version and gradually increasing the traffic to the new version.
+  
+  Example:
+  ```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-container
+        image: my-image:v1
+  strategy:
+    type: Canary
+    canary:
+      steps:
+      - setWeight: 10 # Start with 10% traffic to the new version
+      - pause: # Wait for a certain period to monitor the new version
+      - setWeight: 50 # Increase traffic to 50% after successful monitoring
+      - pause: # Wait for a certain period to monitor the new version
+      - setWeight: 100 # Finally, switch all traffic to the new version
+```
+- Canary Deployment with Blue-Green Deployment: This strategy combines the canary deployment approach with blue-green deployment.
+  - It allows for gradual updates while maintaining the ability to switch traffic between two environments.
+  - It can be useful for applications that require both zero-downtime updates and testing new versions with production data.
+
+
+# Helm
+
+- Helm is a package manager for Kubernetes that simplifies the deployment and management of applications on Kubernetes clusters. It allows users to define, install, and upgrade complex Kubernetes applications using reusable templates called charts.
+
+# Helm Components
+- Helm CLI - The command-line interface used to interact with Helm. It provides commands to install, upgrade, and manage Helm charts.
+- Charts - A Helm chart is a collection of files that describe a related set of Kubernetes resources. Charts can be used to deploy applications, services, and other resources on a Kubernetes cluster.
+- Repositories - Helm charts are stored in repositories, which can be public or private. Users can add repositories to their Helm CLI to access and install charts.
+- Releases - A release is an instance of a chart that has been deployed to a Kubernetes cluster. Each release has a unique name and can be upgraded or rolled back independently.
+
+# Helm Installation
+- Helm can be installed on various operating systems using different package managers. Here are the commands for each platform:
+- https://helm.sh/docs/intro/install/
+- Linux - "curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3"
+ "chmod 700 get_helm.sh"
+ "./get_helm.sh"
+
+- Windows - "choco install kubernetes-helm"
+
+- MacOs - "brew install helm"
+
+# Helm Commands
+- helm search:    search for charts
+- helm pull:      download a chart to your local directory to view
+- helm install:   upload the chart to Kubernetes
+- helm list:      list releases of charts
+- helm upgrade:   upgrade a release to a new version of the chart
+- helm rollback:  roll back a release to a previous version
+- helm uninstall: remove a release from the cluster
+- helm repo add:  add a chart repository to your Helm CLI
+- helm status:   view the status of a release
+
+Artifacts stored in a Helm chart repository are called charts and stores in a registry on https://artifacthub.io/. Charts are packaged applications that can be easily installed and managed on a Kubernetes cluster.
+
+# Example of Using Helm
+To demonstrate the use of Helm, we will install a simple Nginx web server using a Helm chart.
+# Step 1: Add the Helm stable repository
+helm repo add bitnami https://charts.bitnami.com/bitnami
+# Step 2: Update the Helm repository to get the latest charts
+helm repo update
+# Step 3: Search for the Nginx chart in the stable repository
+helm search repo bitnami/nginx
+# Step 4: Install the Nginx chart with a release name "my-nginx"
+helm install my-nginx bitnami/nginx
+# Step 5: Verify the installation by checking the status of the release
+helm status my-nginx
+# Step 6: Access the Nginx web server
+# You can access the Nginx web server by getting the service details
+kubectl get svc --namespace default my-nginx
+# Step 7: To uninstall the Nginx release, you can use the following command
+helm uninstall my-nginx
+# Step 8: Clean up the Helm repository
+helm repo remove bitnami
+# Step 9: To view the list of all releases, you can use the following command
+helm list
+
+# Creating a helm chart
+- helm create <chart-name>
+# This command will create a new directory with the specified chart name and generate the necessary files and directories for a Helm chart.
+# Example of Creating a Helm Chart
+```bash
+helm create jomacs
+```
+Run tree command to view the structure of the created chart:
+```tree jomacs```
+# This command will display the directory structure of the created Helm chart, including the templates, values, and other necessary files.
+# Example of a Helm Chart Structure
+jomacs
+├── Chart.yaml
+├── charts
+├── templates
+│   ├── _helpers.tpl
+│   ├── deployment.yaml
+│   ├── hpa.yaml
+│   ├── ingress.yaml
+│   ├── NOTES.txt
+│   ├── service.yaml
+│   ├── serviceaccount.yaml
+│   └── tests
+│       └── test-connection.yaml
+└── values.yaml
+
+# Explanation of the Helm Chart Structure
+- Chart.yaml: Contains metadata about the chart, such as its name, version, and description.
+eg. 
+```yaml
+apiVersion: v2
+name: jomacs
+description: A Helm chart for deploying Jomacs application
+version: 0.1.0
+appVersion: "1.0"
+```
+
+- charts: A directory that can contain other Helm charts as dependencies.
+- templates: Contains the Kubernetes manifest templates that define the resources to be created when the chart is installed. These templates can include deployments, services, ingress, and other Kubernetes resources.
+- _helpers.tpl: A file that contains helper functions and templates that can be used in other templates.
+- values.yaml: Contains the default configuration values for the chart. These values can be overridden when installing the chart.
+
+# Example of a deployment.yaml file
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-deployment
+  labels:
+    app: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: {{ .Release.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: {{ .Values.resources.requests.cpu }}
+            memory: {{ .Values.resources.requests.memory }}
+          limits:
+            cpu: {{ .Values.resources.limits.cpu }}
+            memory: {{ .Values.resources.limits.memory }}
+
+# Example of a values.yaml file
+```yaml
+replicaCount: 1
+image:
+  repository: nginx
+  tag: latest
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+  limits:
+    cpu: "200m"
+    memory: "256Mi"
+
+# Example of a service.yaml file
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-service
+  labels:
+    app: {{ .Release.Name }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+  - port: 80
+    targetPort: 80
+  selector:
+    app: {{ .Release.Name }}
+# Example of an ingress.yaml file
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-ingress
+  labels:
+    app: {{ .Release.Name }}
+spec:
+  rules:
+  - host: {{ .Values.ingress.host }}
+    http:
+      paths: {{ range .Values.ingress.paths }}
+        backend:
+          service:
+            name: {{ .Release.Name }}-service
+            port:
+              number: {{ .Values.service.port }}
+
+# Overriding Values in Helm
+- You can override the default values in the values.yaml file by providing a custom values file or
+using the --set flag during installation.
+- For example, to override the image tag and replica count, you can use the following command:
+```bash
+helm install jomacs ./jomacs --set image.tag=1.0.0,replicaCount=3
+```
+# This command will install the jomacs chart with the specified image tag and replica count.
+
+# Advanced Helm Features
+- Helm supports advanced features like templating, conditionals, and loops in the templates.
+- You can use the {{ .Values }} syntax to access values from the values.yaml file in your templates.
+- You can also use conditionals and loops to create dynamic templates based on the values provided.
+- For example, you can use the following syntax to conditionally include a resource in your template:
+1. (if statement/conditionals)
+```yaml
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+//all other syntax
+{{- end }}
+
+2. (loop)
+```yaml
+{{- range .Values.ingress.paths }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+// all other syntax
+{{- end }}
+# This will include the Ingress resource only if the ingress.enabled value is set to true in
+# the values.yaml file, and it will loop through the paths defined in the values.yaml file
+# to create multiple paths in the Ingress resource.
+
+3. (_helpers.tpl) Named Templates
+```yaml
+{{/* Define a named template for the service name */}}
+{{- define "jomacs.serviceName" -}}
+{{- printf "%s-service" .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+# This named template can be used in other templates to get the service name based on the release name.
+
+format("%s", "jomacs") is a function that formats the string with the release name.
+Output = jomacs 
+
+format("/%s/%s-%s/", "jomacs", "service", "name") is a function that formats the string with the release name, service, and name.
+Output = /jomacs/service-name/
+
+Obfuscation
