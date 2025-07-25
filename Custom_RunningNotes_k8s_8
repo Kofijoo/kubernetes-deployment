@@ -1904,6 +1904,7 @@ helm install prometheus prometheus-community/prometheus --namespace monitoring
 ```bash
 helm repo add grafana https://grafana.github.io/helm-charts
 helm repo update
+helm repo list
 helm install grafana grafana/grafana --namespace monitoring
 ```
 - To install Loki using Helm, you can run the following command:
